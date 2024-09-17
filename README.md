@@ -186,7 +186,7 @@ The SPDX license identifier for this project is `MIT` OR `Apache-2.0`.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
-# LAIR3-BDK5 layer 3 Blockchain Deployment Kit v5
+# LAIR3-BDK6 layer 3 Blockchain Deployment Kit v6
 lair: a place where a wild animal, especially a fierce or dangerous one, lives<br />
 pronounced: layer three Blockchain Deployment Kit<br />
 
@@ -212,7 +212,7 @@ instructions are somewhat specific to Ubuntu 22.04LTS<br />
 
 to begin install the following requirements<br />
 
-#  go1.21.6 install on Ubuntu Linux 22.04LTS for amd64 using bash<br />
+#  go1.23.1 install on Ubuntu Linux 22.04LTS or Mint 21 for amd64 using bash<br />
 ```bash
 #get wget
 sudo apt install wget
@@ -223,7 +223,7 @@ sudo rm -rf /usr/local/go
 # possibly necessary
 sudo apt remove golang $$ autoremove
 #extract verbosely with force
-sudo tar -xvf go1.21.6.linux-amd64.tar.gz -C /usr/local/
+sudo tar -xvf go1.23.1.linux-amd64.tar.gz -C /usr/local/
 #add go path to ./bashrc current user with default Ubuntu 22 bash shell
 echo 'export PATH="$PATH:/usr/local/go/bin"' | sudo tee -a ./bashrc
 #refresh your bash shell
@@ -232,7 +232,7 @@ source $HOME/.bashrc
 go version
 ```
 
-# nodejs install<br />
+# nodejs install for version 22<br />
 ```bash
 nodejs -v
 sudo apt remove --purge nodejs
@@ -259,12 +259,11 @@ sudo apt update
 sudo apt install kurtosis-cli
 ```
 
-# kurtosis-engine upgrade
+# kurtosis-engine upgrade (optional)
 ```bash
 sudo apt update && sudo apt install --only-upgrade kurtosis-cli
 sudo kurtosis engine restart
 ```
-
 
 # yq source build
 
