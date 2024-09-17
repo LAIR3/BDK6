@@ -262,7 +262,7 @@ sudo apt install kurtosis-cli
 # kurtosis-engine upgrade
 ```bash
 sudo apt update && sudo apt install --only-upgrade kurtosis-cli
-kurtosis engine restart
+sudo kurtosis engine restart
 ```
 
 
@@ -270,8 +270,18 @@ kurtosis engine restart
 blockchain swiss army knife source build<br />
 
 ```bash
-snap install yq
-sudo apt install bc protoc
+sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+sudo chmod +x /usr/local/bin/yq
+yq --version
+sudo apt install autoconf automake bc libtool curl make g++ unzip
+git clone https://github.com/protocolbuffers/protobuf.git
+cd protobuf
+git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+./autogen.sh
+./configure
+make
+sudo make install
+sudo ldconfig  # Refresh shared library cache
 git clone https://github.com/maticnetwork/polygon-cli.git
 cd polygon-cli
 make install
