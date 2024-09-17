@@ -299,7 +299,8 @@ make install
 curl -L https://foundry.paradigm.xyz | bash
 source $HOME/.bashrc
 foundryup
-cd BDK5
+git clone https://github.com/lair3/BDK6
+cd BDK6
 git config --global user.email "codephreak@dmg.finance"
 git config --global user.name "Professor-Codephreak"
 forge init --force
@@ -307,9 +308,18 @@ forge init --force
 To begin make sure you have installed the above requirements including [Docker](https://docs.docker.com/get-docker/) and [Kurtosis](https://docs.kurtosis.com/install/)
 
 run tool_check to test for version requirements
+# docker apt install way
 
 ```bash
-sh scripts/tool_check.sh
+sudo apt install docker.io
+sudo systemctl start docker
+# enable on boot autostart
+sudo systemctl enable docker
+sudo docker --version
+sudo docker info
+# avoid sudo docker
+sudo usermod -aG docker $USER
+docker run hello-world
 ```
 
 Once that is good and installed on your system, you can run the following command to locally deploy the complete BDK stack
