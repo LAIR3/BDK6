@@ -347,7 +347,7 @@ this will take between 5 and 20 minutes depending on your hardware
 
 ```bash
 kurtosis clean --all
-kurtosis run --enclave bdk-v5 --args-file params.yml --image-download always .
+kurtosis run --enclave bdk-v6 --args-file params.yml --image-download always .
 ```
 
 The command above deploys a BDK stack using [zkevm-node](https://github.com/0xPolygonHermez/zkevm-node) as the sequencer. Alternatively, to launch a CDK stack using [cdk-erigon](https://github.com/0xPolygonHermez/cdk-erigon) as a sequencer, you can run the following command.
@@ -361,7 +361,7 @@ kurtosis run --enclave bdk-v5 --args-file cdk-erigon-sequencer-params.yml --imag
 First, you will need to figure out which port Kurtois uses for the RPC. You can get a general feel for the entire network layout by running the following command:
 
 ```bash
-kurtosis enclave inspect bdk-v5
+kurtosis enclave inspect bdk-v6
 ```
 
 # view port mapping
@@ -406,7 +406,7 @@ sudo apt install postgresql-client-common
 
 foundry creates script and src folders
 
-The LAIR3-BDK5 Layer 3 Blockchain Development Kit is designed to facilitate the deployment and management of advanced blockchain solutions specifically supporting zkEVM Rollup and Validium technologies. Merging the best of the Kurtosis SDK, polygon-cli, avalanche subnet-evm and ignite with Starlark the Blockchain Deployment Kit facilitates the creation and deployment of customized blockchain environments with enhanced observability and testing capabilities.
+The LAIR3-BDK6 Layer 3 Blockchain Development Kit is designed to facilitate the deployment and management of advanced blockchain solutions specifically supporting zkEVM Rollup and Validium technologies. Merging the best of the Kurtosis SDK, polygon-cli, avalanche subnet-evm and ignite with Starlark the Blockchain Deployment Kit facilitates the creation and deployment of customized blockchain environments with enhanced observability and testing capabilities.
 
 The primary goal is to to make blockchain deployment a sane operation accessiable to regular developers interested in dapplications development.
 
@@ -520,16 +520,15 @@ kurtosis service logs bdk-v5 zkevm-bridge-ui-001
 # Open a service shell
 enter the service container to manually inspect and debug example brige-ui<br />
 ```bash
-kurtosis service shell bdk-v5 zkevm-bridge-ui-001
+kurtosis service shell bdk-v6 zkevm-bridge-ui-001
 ```
 
 # Environment Setup
 Clone the Repository and Install Dependencies
 
 ```bash
-git clone https://github.com/LAIR3/BDK5.git
-cd BDK5
-sh scripts/tool_check.sh
+git clone https://github.com/LAIR3/BDK6.git
+cd BDK6
 ```
 
 # Clean Up Previous Environments
@@ -575,7 +574,7 @@ docker network inspect NAME
 # BDK-v5 as Kurtosis Enclave
 
 ```bash
-kurtosis run --enclave BDK-v5 --args-file params.yml --image-download always .
+kurtosis run --enclave BDK-v6 --args-file params.yml --image-download always .
 ```
 
 # Inspect Enclave for Dashboard Details
@@ -585,7 +584,7 @@ kurtosis enclave ls
 ```
 
 ```bash
-kurtosis enclave inspect BDK-v5
+kurtosis enclave inspect BDK-v6
 ```
 
 # Fetch Service Logs
