@@ -217,7 +217,7 @@ to begin install the following requirements<br />
 #get wget
 sudo apt install wget
 #wget go
-wget https://go.dev/dl/go1.21.6.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.23.1.linux-amd64.tar.gz
 #remove existing go
 sudo rm -rf /usr/local/go
 # possibly necessary
@@ -235,7 +235,7 @@ go version
 # nodejs install<br />
 ```bash
 nodejs -v
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install nodejs -y
 nodejs -v
 ```
