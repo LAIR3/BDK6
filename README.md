@@ -266,26 +266,32 @@ sudo kurtosis engine restart
 ```
 
 
-# polygon-cli install
-blockchain swiss army knife source build<br />
+
 
 ```bash
 sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
 sudo chmod +x /usr/local/bin/yq
 yq --version
 sudo apt install autoconf automake bc libtool curl make g++ unzip
-git clone https://github.com/protocolbuffers/protobuf.git
-cd protobuf
-git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+wget https://github.com/protocolbuffers/protobuf/releases/download/v21.9/protobuf-all-21.9.zip
+unzip protobuf-all-21.9.zip
+cd protobuf-21.9
 ./autogen.sh
 ./configure
 make
 sudo make install
 sudo ldconfig  # Refresh shared library cache
+protoc --version
+```
+
+# polygon-cli install
+blockchain swiss army knife source build tools<br />
+```bash
 git clone https://github.com/maticnetwork/polygon-cli.git
 cd polygon-cli
 make install
 ```
+
 # foundry install 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
