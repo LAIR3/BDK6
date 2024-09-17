@@ -1,4 +1,4 @@
-# An externsion of the the Polygon CDK Kurtosis Package to create layer 3 Blockchain Deployment Kit
+# An extension of the the Polygon CDK Kurtosis Package to create layer 3 Blockchain Deployment Kit
 
 A [Kurtosis](https://github.com/kurtosis-tech/kurtosis) package that deploys a private, portable, and modular [Polygon CDK](https://docs.polygon.technology/cdk/) devnet over [Docker](https://www.docker.com/) or [Kubernetes](https://kubernetes.io/).
 
@@ -235,6 +235,7 @@ go version
 # nodejs install<br />
 ```bash
 nodejs -v
+sudo apt remove --purge nodejs
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install nodejs -y
 nodejs -v
