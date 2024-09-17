@@ -266,12 +266,15 @@ sudo kurtosis engine restart
 ```
 
 
-
+# yq source build
 
 ```bash
 sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
 sudo chmod +x /usr/local/bin/yq
 yq --version
+```
+# protobuf source build
+```bash
 sudo apt install autoconf automake bc libtool curl make g++ unzip
 wget https://github.com/protocolbuffers/protobuf/releases/download/v21.9/protobuf-all-21.9.zip
 unzip protobuf-all-21.9.zip
