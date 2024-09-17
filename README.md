@@ -311,7 +311,7 @@ run tool_check to test for version requirements
 # docker apt install way
 
 ```bash
-sudo apt install docker.io
+sudo apt install docker.io docker-compose
 sudo systemctl start docker
 # enable on boot autostart
 sudo systemctl enable docker
@@ -568,8 +568,11 @@ docker system prune -a --volumes
 ```bash
 docker network ls
 docker network inspect NAME
+docker network inspect bridge
 ```
-
+```bash
+nslookup el-l-geth-lighthouse
+docker inspect addressesofcontainer
 ############ START ############
 # BDK-v5 as Kurtosis Enclave
 
