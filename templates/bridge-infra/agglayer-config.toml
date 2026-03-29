@@ -1,0 +1,68 @@
+[FullNodeRPCs]
+# TODO switch this to permissionless
+1 = "http://{{.l2_rpc_name}}{{.deployment_suffix}}:{{.zkevm_rpc_http_port}}"
+
+[ProofSigners]
+1 = "{{.zkevm_l2_proofsigner_address}}"
+
+[RPC]
+Host = "0.0.0.0"
+Port = {{.zkevm_agglayer_port}}
+ReadTimeout = "60s"
+WriteTimeout = "60s"
+MaxRequestsPerIPAndSecond = 5000
+
+[Log]
+Environment = "production" # "production" or "development"
+Level = "info"
+Outputs = ["stderr"]
+
+[EthTxManager]
+FrequencyToMonitorTxs = "1s"
+WaitTxToBeMined = "2m"
+ForcedGas = 0
+GasPriceMarginFactor = 1
+MaxGasPriceLimit = 0
+PrivateKeys = [
+	{Path = "/etc/zkevm/agglayer.keystore", Password = "{{.zkevm_l2_keystore_password}}"},
+]
+KMSKeyName = "" # Disable for local
+
+[L1]
+ChainID = {{.l1_chain_id}}
+NodeURL = "{{.l1_rpc_url}}"
+RollupManagerContract = "{{.zkevm_rollup_manager_address}}"
+
+[L2]
+ChainID = {{.zkevm_rollup_chain_id}}
+
+# AggLayer v0.3+ Pessimistic Proof configuration.
+# Pessimistic proof ensures no connected chain can withdraw more than it has deposited,
+# providing cryptographic guarantees for cross-chain asset safety via SP1 zkVM + Plonky3.
+[PessimisticProof]
+Enabled = true
+# Generate mock proofs for devnet (set false for testnet/mainnet with real SP1 prover).
+GenerateMockProof = true
+
+# Unified Bridge configuration.
+# The Unified Bridge enables native asset fungibility across connected chains
+# without wrapping/unwrapping, supporting atomic cross-chain transactions.
+[UnifiedBridge]
+Enabled = true
+OriginNetwork = 0
+DestinationNetwork = 1
+
+# Certificate settlement configuration for AggLayer v0.3+.
+# Manages how certificates (state commitments) are settled to L1.
+[CertificateSender]
+Enabled = true
+CheckInterval = "10s"
+MaxRetries = 5
+
+# State management for the local balance tree.
+# Tracks deposits and withdrawals per connected chain.
+[State]
+DBPath = "/data/agglayer-state"
+
+[Telemetry]
+PrometheusAddr = "0.0.0.0:{{.zkevm_prometheus_port}}"

@@ -1,0 +1,84 @@
+---
+# Basic deployment workflow.
+# Note that more advanced use cases are tested in the nightly workflow.
+name: Deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Kurtosis CDK tools
+        uses: ./.github/actions/setup-kurtosis-cdk
+
+      # Deploy the CDK environment with cdk-erigon, serving as the sequencer.
+      # Set up the cdk-node for the remaining components.
+      # Additionally, deploy cdk-erigon and zkevm-node as permissionless nodes or RPCs.
+      - name: Deploy Kurtosis CDK package
+        run: |
+          kurtosis run --enclave bdk-v6 --args-file params.yml . \
+            '{
+              "deploy_cdk_erigon_node": true,
+              "deploy_zkevm_permissionless_node": true,
+              "apply_workload": true,
+              "args": {
+                "sequencer_type": "erigon",
+                "l1_seconds_per_slot": 1
+              }
+            }'
+
+      - name: Monitor verified batches (CDK Erigon Permissionless RPC)
+        uses: ./.github/actions/monitor-cdk-verified-batches
+        with:
+          rpc_service: cdk-erigon-node-001
+
+      - name: Monitor verified batches (zkEVM Node Permissionless RPC)
+        uses: ./.github/actions/monitor-cdk-verified-batches
+        with:
+          rpc_service: zkevm-node-rpc-pless-001
+
+  zkevm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Kurtosis CDK tools
+        uses: ./.github/actions/setup-kurtosis-cdk
+
+      # Deploy the CDK environment with zkevm-node, serving as the sequencer.
+      # Also set up the zkevm-node for the remaining components.
+      # Additionally, deploy zkevm-node as permissionless node or RPC.
+      - name: Deploy Kurtosis CDK package
+        run: |
+          kurtosis run --enclave bdk-v6 --args-file params.yml . \
+            '{
+              "deploy_cdk_erigon_node": false,
+              "deploy_zkevm_permissionless_node": true,
+              "apply_workload": true,
+              "args": {
+                "sequencer_type": "zkevm",
+                "l1_seconds_per_slot": 1
+              }
+            }'
+
+      - name: Monitor verified batches (zkEVM Node Trusted RPC)
+        uses: ./.github/actions/monitor-cdk-verified-batches
+        with:
+          rpc_service: zkevm-node-rpc-001
+
+      - name: Monitor verified batches (zkEVM Node Permissionless RPC)
+        uses: ./.github/actions/monitor-cdk-verified-batches
+        with:
+          rpc_service: zkevm-node-rpc-pless-001
+
+      # TODO(nit): Deploy a CDK Erigon Permissionless RPC and check that it can sync.
