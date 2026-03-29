@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # ─── Constants ────────────────────────────────────────────────────────
-GO_VERSION="1.22.5"
+GO_VERSION="1.24.4"
 NODE_MAJOR=20
 POLYCLI_VERSION="v0.1.108"
 YQ_VERSION="v4.44.1"
@@ -177,7 +177,7 @@ else
         https://github.com/maticnetwork/polygon-cli.git "$POLYCLI_BUILD_DIR"
     pushd "$POLYCLI_BUILD_DIR" >/dev/null
     export PATH="/usr/local/go/bin:$PATH"
-    CGO_ENABLED=0 go build -o polycli main.go
+    go build -o polycli main.go
     mv polycli /usr/local/bin/polycli
     chmod +x /usr/local/bin/polycli
     popd >/dev/null
