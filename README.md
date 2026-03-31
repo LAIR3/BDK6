@@ -42,71 +42,108 @@ BDK6 deploys a complete Polygon CDK stack via Kurtosis Starlark orchestration:
 
 ## Prerequisites
 
-Install the following requirements (Ubuntu 22.04+ / 24.04 LTS):
+- Linux-based OS: Ubuntu 22.04+, Linux Mint 21.x, or Alpine 3.19+
+- At least 8 GB RAM, 2-core CPU, AMD64 or ARM64
+- `sudo` access
 
-### Go install
+## Install (One Command)
+
+BDK6 provides automated installers that handle all dependencies, container runtime setup, Kurtosis engine start, and enclave deployment in a single run.
+
+### Podman (default, Apache 2.0 licensed)
+
 ```bash
-wget https://go.dev/dl/go1.22.5.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go
-sudo tar -xvf go1.22.5.linux-amd64.tar.gz -C /usr/local/
-echo 'export PATH="$PATH:/usr/local/go/bin"' >> ~/.bashrc
-source ~/.bashrc
-go version
+git clone https://github.com/lair3/bdk6.git && cd bdk6
+./scripts/install-deps-ubuntu.sh
 ```
 
-### Node.js install
+### Docker CE (compatibility)
+
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install nodejs -y
-node -v
+./scripts/install-deps-ubuntu-docker.sh
 ```
 
-### Docker install
+### Alpine Linux
+
 ```bash
-# https://docs.docker.com/engine/install/ubuntu/
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
-sudo groupadd docker
-sudo usermod -aG docker $USER
-newgrp docker
-docker ps
+./scripts/install-deps-alpine.sh
 ```
 
-### Kurtosis install
-```bash
-echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-sudo apt update
-sudo apt install kurtosis-cli
-kurtosis engine restart
-```
+The installer:
 
-### Polygon CLI install
-```bash
-snap install yq
-sudo apt install bc protoc
-git clone https://github.com/maticnetwork/polygon-cli.git
-cd polygon-cli
-make install
-```
+1. Auto-elevates with `sudo` (prompts for password if needed)
+2. Installs all 11 dependency groups (system packages, Go 1.24.4, Node.js 20.x, container runtime, Kurtosis, Foundry, polycli, yq, jq, Python deps)
+3. **Resumes** from where it left off — skips already-installed tools, reuses the Python venv
+4. Starts Kurtosis engine and deploys the BDK6 enclave
+5. Use `--clean` for a fresh install from scratch
 
-### Foundry install
-```bash
-curl -L https://foundry.paradigm.xyz | bash
-source ~/.bashrc
-foundryup
-```
+### What gets installed
 
-### Verify requirements
+| Tool | Version | Purpose |
+|---|---|---|
+| Podman | 4.6.2+ (Kubic) | Container runtime (Apache 2.0) |
+| Go | 1.24.4 | Build polycli, CDK tools |
+| Node.js | 20.x LTS | JavaScript toolchain |
+| Kurtosis | 2.1.0 | Enclave orchestration |
+| Foundry | nightly | forge, cast, anvil, chisel |
+| polycli | v0.1.108 | Polygon CLI (load testing, wallet) |
+| yq / jq | latest | YAML/JSON processing |
+| Python 3 | system | mkdocs, podman-compose |
+| PostgreSQL client | 14.x | Database access |
+| protobuf-compiler | 3.12+ | Protocol buffer compilation |
+
+### Why Podman + Alpine
+
+BDK6 targets **Podman on Alpine Linux** as the reference deployment platform. This combination is purpose-built for blockchain infrastructure:
+
+**Podman (Apache 2.0)**
+
+- **License purity** — Apache 2.0 throughout the entire stack. No proprietary runtime licensing (Docker CE is Apache 2.0 but Docker Desktop is proprietary; the distinction creates compliance risk for commercial node operators). Podman eliminates this ambiguity entirely.
+- **Daemonless** — no persistent root daemon. Each container is a child process of the caller, not a shared daemon. This means a compromised container cannot leverage a daemon socket to escalate across the host — critical when running validator nodes that hold signing keys.
+- **Rootless by default** — containers run in user namespaces without real root. Validator and sequencer processes never need root, even for networking. Reduces blast radius of any exploit to the unprivileged user.
+- **OCI-compliant** — same images, same registries, same Dockerfiles. `podman-docker` provides a drop-in `docker` CLI alias. Existing Docker workflows work unchanged.
+
+**Alpine Linux**
+
+- **Minimal attack surface** — ~5 MB base image, ~130 packages in a typical install vs. ~700+ on Ubuntu. Fewer packages means fewer CVEs, fewer update cycles, smaller window of vulnerability. For validator nodes exposed to the internet, every unnecessary binary is a liability.
+- **musl libc** — smaller, auditable C library (~120 KLOC vs. glibc's ~1.8 MLOC). Static linking is the default, producing self-contained binaries with no shared library dependency chain to attack.
+- **Read-only root capable** — Alpine's simplicity enables immutable root filesystem deployments. Validator nodes can boot from a signed, read-only image with only `/var` writable, preventing persistent rootkits.
+- **Fast boot, small footprint** — Alpine VMs boot in seconds and run blockchain nodes in <512 MB RAM. This enables rapid horizontal scaling of L2/L3 nodes and cost-effective geographic distribution for decentralization.
+- **Native Podman support** — `apk add podman` installs from official repos with no PPAs, no Kubic workarounds. The Alpine + Podman + musl stack is fully self-contained under permissive licenses.
+- **Reproducible builds** — Alpine's `abuild` system and pinned package versions enable deterministic node images. Two operators building from the same Dockerfile get byte-identical container layers, enabling trustless verification of node software.
+
+**Together**: an Alpine node running BDK6 via Podman has a fully auditable, license-clean, minimal-privilege stack from kernel to application. No proprietary dependencies, no root daemons, no unnecessary attack surface — the properties blockchain infrastructure demands.
+
+### Runtime architecture
+
+BDK6 uses a dual-runtime approach:
+
+| Runtime | Role | License |
+|---|---|---|
+| **Podman** | Primary container runtime, systemd services, CLI | Apache 2.0 |
+| **Docker CE** | Kurtosis enclave orchestration (devnet setup) | Apache 2.0 |
+
+Kurtosis 2.1.0 requires Docker CE for enclave creation (its Docker API usage exceeds Podman's compat layer). The installer handles both automatically — Podman is installed first as the system runtime, then Docker CE is added specifically for Kurtosis deployment. Both coexist without conflict.
+
+For production node operation after deployment, Podman is the runtime. Docker is only needed during the initial devnet setup phase.
+
+A standalone Docker CE installer (`install-deps-ubuntu-docker.sh`) is also available for Docker-only environments.
+
+### Verify prerequisites
+
 ```bash
-sh scripts/tool_check.sh
+bash scripts/tool_check.sh
 ```
 
 ## Quick Start
 
-```bash
-# Clean previous environments
-kurtosis clean --all
+The installer deploys the BDK6 enclave automatically. After `./scripts/install-deps-ubuntu.sh` completes, the stack is running.
 
-# Deploy with default params (cdk-validium mode, erigon sequencer)
+To redeploy or deploy with different parameters:
+
+```bash
+# Clean and redeploy (default: cdk-validium mode, erigon sequencer)
+kurtosis clean --all
 kurtosis run --enclave bdk-v6 --args-file params.yml --image-download always .
 
 # Deploy in rollup mode
@@ -201,21 +238,60 @@ psql -U master_user -h 127.0.0.1 -p 5432 -d master
 # Clean Kurtosis environments
 kurtosis clean --all
 
-# Full Docker cleanup
-docker stop $(docker ps -aq)
-docker rm $(docker ps -aq)
-docker system prune -a --volumes
+# Full container cleanup (works with both Podman and Docker)
+podman stop -a 2>/dev/null; docker stop $(docker ps -aq) 2>/dev/null
+podman rm -a 2>/dev/null; docker rm $(docker ps -aq) 2>/dev/null
+podman system prune -a --volumes 2>/dev/null || docker system prune -a --volumes
 ```
 
 ## Troubleshooting
 
+### Container runtime services (Podman)
+
+```bash
+# Check service status
+systemctl status podman.socket podman-docker-proxy
+
+# Restart services
+sudo systemctl restart podman.socket podman-docker-proxy
+
+# View proxy logs
+journalctl -u podman-docker-proxy -f
+
+# Re-run installer (resumes, won't reinstall existing tools)
+./scripts/install-deps-ubuntu.sh
+```
+
+### Kurtosis engine won't start
+
+```bash
+# Full reset
+kurtosis clean --all
+podman rm -f -a
+kurtosis engine restart
+```
+
 ### Kurtosis logs directory error
 ```bash
 sudo mkdir -p /var/log/kurtosis/
-sudo chown -R $USER:docker /var/log/kurtosis
+sudo chown -R $USER:$USER /var/log/kurtosis
 sudo chmod -R 755 /var/log/kurtosis
 kurtosis engine restart
-sudo systemctl restart docker
+```
+
+### Switch between Podman and Docker
+
+The installers are separate scripts and don't conflict. To switch:
+
+```bash
+# Stop current runtime
+kurtosis clean --all
+
+# Switch to Docker
+./scripts/install-deps-ubuntu-docker.sh
+
+# Or switch back to Podman
+./scripts/install-deps-ubuntu.sh
 ```
 
 ## Reference Links

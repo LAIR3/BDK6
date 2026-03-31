@@ -24,7 +24,7 @@ deploy_zkevm_permissionless_node: false
 deploy_cdk_erigon_node: true
 
 # Deploy observability stack.
-deploy_observability: false
+deploy_observability: true
 
 # Deploy Blockscout stack.
 deploy_l2_blockscout: false

@@ -27,9 +27,8 @@ def run(plan, args):
                 "preregistered_validator_keys_mnemonic": args[
                     "l1_preallocated_mnemonic"
                 ],
-                "dencun_fork_epoch": 0,
+                "deneb_fork_epoch": 0,
                 "electra_fork_epoch": 100000000,
-                "prague_fork_epoch": 100000000,
                 ## Use these parameters for rapid testing and development.
                 # This setting reduces the number of seconds per slot on the Beacon chain to,
                 # allowing for faster progression through slots and epochs.

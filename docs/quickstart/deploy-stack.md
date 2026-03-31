@@ -4,43 +4,58 @@ comments: true
 
 ## Hardware requirements
 
-- A Linux-based OS (e.g., Ubuntu Server 22.04 LTS).
+- A Linux-based OS (Ubuntu 22.04+, Linux Mint 21.x, or Alpine 3.19+).
 - At least 8GB RAM with a 2-core CPU.
-- An AMD64 architecture system.
+- AMD64 or ARM64 architecture.
 
-!!! tip
-    Make sure you install [Docker Engine](https://docs.docker.com/engine/) version 4.27 or higher to run the zkEVM prover on MacOS.
+## Automated install and deploy
 
-## Prerequisites
+The fastest way to get running. One command installs all dependencies, sets up runtimes, starts the Kurtosis engine, and deploys the BDK6 enclave:
 
-1. Install [Kurtosis](https://docs.kurtosis.com/install/).
+```sh
+git clone https://github.com/lair3/bdk6.git
+cd bdk6
+./scripts/install-deps-ubuntu.sh
+```
 
-2. Install the [Foundry toolchain](https://book.getfoundry.sh/getting-started/installation).
+The installer:
 
-3. Run the following script to check you have the remaining required tools and install where missing.
+- Auto-elevates with `sudo` (prompts for password)
+- Installs Podman (Apache 2.0) as the primary container runtime
+- Installs Docker CE for Kurtosis enclave orchestration
+- Installs Go 1.24.4, Node.js 20.x, Kurtosis, Foundry, polycli, yq, jq, Python deps
+- **Resumes** on re-run — skips already-installed tools, reuses the Python venv
+- Starts the Kurtosis engine with a countdown timer for gRPC initialization
+- Deploys the BDK6 enclave end-to-end
+- Use `--clean` for a fresh install from scratch
+
+**Other platforms:**
+
+| Platform | Command |
+|---|---|
+| Ubuntu/Mint (Podman + Docker) | `./scripts/install-deps-ubuntu.sh` |
+| Ubuntu/Mint (Docker only) | `./scripts/install-deps-ubuntu-docker.sh` |
+| Alpine Linux (OpenRC) | `./scripts/install-deps-alpine.sh` |
+
+## Manual setup
+
+If you prefer to install dependencies manually:
+
+1. Install the required tools (Go 1.24.4, Node.js 20.x, Docker, Kurtosis, Foundry, polycli, yq, jq).
+
+2. Verify with the tool check script:
 
     ```sh
-    curl -s https://raw.githubusercontent.com/0xPolygon/kurtosis-cdk/main/scripts/tool_check.sh | bash
+    bash scripts/tool_check.sh
     ```
 
-## Set up
-
-1. Clone the repo and `cd` into it.
+3. Deploy:
 
     ```sh
-    git clone https://github.com/0xPolygon/kurtosis-cdk.git
-    cd kurtosis-cdk
+    kurtosis run --enclave bdk-v6 --args-file params.yml --image-download always .
     ```
 
-2. Make sure Docker is running.
-
-3. Run the Kurtosis enclave.
-
-    ```sh
-    kurtosis run --enclave bdk-v6 --args-file params.yml .
-    ```
-
-    This command takes a few minutes to complete and sets up and runs an entire local CDK deployment.
+    Deployment takes 5-20 minutes depending on hardware.
 
 When everything is set up and running, we can play around with the test CDK.
 
